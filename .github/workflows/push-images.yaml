@@ -19,8 +19,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::918821718107:role/gha-container-image-lsyncd
-          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.REPO_IAM_ROLE }}
+          aws-region: ${{ secrets.REPO_ECR_REGION }}
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
         with:
