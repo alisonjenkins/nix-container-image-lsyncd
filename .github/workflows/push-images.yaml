@@ -1,0 +1,48 @@
+name: push-images
+run-name: push images
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-images:
+    if: ${{ github.event.pull_request.merged }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::918821718107:role/gha-container-image-lsyncd
+          aws-region: eu-west-1
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf:
+            system = aarch64-linux
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: DeterminateSystems/flake-checker-action@main
+      - uses: docker/setup-qemu-action@v3
+      - name: Build aarch64 image
+        run: nix build -o container_aarch64 '#.packages.aarch64-linux.container_aarch64'
+      - name: Build x86_64 image
+        run: nix build -o container_aarch64 '#.packages.x86_64-linux.container_x86_64'
+      - name: Load images into podman
+        run: |
+          nix develop --command bash -c "podman load < container_aarch64 && podman load < container_x86_64"
+      - name: Login to ECR
+        run: nix develop --command bash -c "aws ecr get-login-password --region eu-west-1 | podman login --username AWS --password-stdin 918821718107.dkr.ecr.eu-west-1.amazonaws.com"
+      - name: Create and push manifest
+        run: |
+          REPO="918821718107.dkr.ecr.eu-west-1.amazonaws.com/lsyncd"
+          TAG=$(date +'%Y-%m-%d_%H-%M')
+          nix develop --command bash -c "podman manifest create --amend \"$REPO:$TAG\""
+          nix develop --command bash -c "podman manifest add \"$REPO:$TAG\" \"localhost/lsyncd:latest-aarch64\""
+          nix develop --command bash -c "podman manifest add \"$REPO:$TAG\" \"localhost/lsyncd:latest-x86_64\""
+          nix develop --command bash -c "podman manifest push --all --rm \"$REPO:$TAG\""
