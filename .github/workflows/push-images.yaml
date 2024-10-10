@@ -3,8 +3,7 @@ run-name: push images
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
     types: [closed]
 
 permissions:
@@ -16,6 +15,10 @@ jobs:
     if: ${{ github.event.pull_request.merged }}
     runs-on: ubuntu-latest
     steps:
+      - name: Print JWT
+        run: |
+          ID_TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://demo" | jq -r .value)
+          echo $ID_TOKEN | base64
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
