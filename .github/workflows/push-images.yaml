@@ -31,7 +31,7 @@ jobs:
       - name: Build aarch64 image
         run: nix build -o container_aarch64 '#.packages.aarch64-linux.container_aarch64'
       - name: Build x86_64 image
-        run: nix build -o container_aarch64 '#.packages.x86_64-linux.container_x86_64'
+        run: nix build -o container_x86_64 '#.packages.x86_64-linux.container_x86_64'
       - name: Load images into podman
         run: |
           podman load < container_aarch64
