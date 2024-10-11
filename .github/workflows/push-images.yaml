@@ -42,9 +42,6 @@ jobs:
         run: |
           REPO="${{ secrets.ACCOUNT_ECR_REPO }}/lsyncd"
           TAG=$(date +'%Y-%m-%d_%H-%M')
-          podman manifest add --help
-          podman images
-          podman inspect localhost/lsyncd:latest-aarch64
           podman manifest create "$REPO:$TAG"
           podman manifest add "$REPO:$TAG" oci-archive:container_aarch64
           podman manifest add "$REPO:$TAG" oci-archive:container_x86_64
