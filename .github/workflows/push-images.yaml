@@ -36,7 +36,7 @@ jobs:
         run: nix develop --command bash -c "aws ecr get-login-password --region ${{ secrets.REPO_ECR_REGION }}" | podman login --username AWS --password-stdin ${{ secrets.ACCOUNT_ECR_REPO }}
       - name: Create and push manifest
         run: |
-          REPO="${{ secrets.ACCOUNT_ECR_REPO }}/lsyncd"
+          REPO="${{ secrets.ACCOUNT_ECR_REPO }}/{{ secrets.ECR_IMAGE_NAME }}"
           TAG=$(date +'%Y-%m-%d_%H-%M')
           podman manifest create "$REPO:$TAG"
           podman manifest add "$REPO:$TAG" docker-archive:container_aarch64
