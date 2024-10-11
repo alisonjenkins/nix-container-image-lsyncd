@@ -32,10 +32,10 @@ jobs:
         run: nix build -o container_aarch64 '#.packages.aarch64-linux.container_aarch64'
       - name: Build x86_64 image
         run: nix build -o container_x86_64 '#.packages.x86_64-linux.container_x86_64'
-      - name: Load images into podman
-        run: |
-          podman load < container_aarch64
-          podman load < container_x86_64
+      # - name: Load images into podman
+      #   run: |
+      #     podman load < container_aarch64
+      #     podman load < container_x86_64
       - name: Login to ECR
         run: nix develop --command bash -c "aws ecr get-login-password --region ${{ secrets.REPO_ECR_REGION }}" | podman login --username AWS --password-stdin ${{ secrets.ACCOUNT_ECR_REPO }}
       - name: Create and push manifest
@@ -46,6 +46,6 @@ jobs:
           podman images
           podman inspect localhost/lsyncd:latest-aarch64
           podman manifest create "$REPO:$TAG"
-          podman manifest add "$REPO:$TAG" localhost/lsyncd:latest-aarch64
-          podman manifest add "$REPO:$TAG" localhost/lsyncd:latest-x86_64
+          podman manifest add "$REPO:$TAG" oci-archive:container_aarch64
+          podman manifest add "$REPO:$TAG" oci-archive:container_x86_64
           podman manifest push --all --rm "$REPO:$TAG"
