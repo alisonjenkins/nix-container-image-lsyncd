@@ -15,7 +15,7 @@ build tag:
     podman manifest create --amend "$REPO:$TAG"
     podman manifest add "$REPO:$TAG" "localhost/lsyncd:latest-aarch64"
     podman manifest add "$REPO:$TAG" "localhost/lsyncd:latest-x86_64"
-    podman manifest push --all --rm "$REPO:$TAG" "docker://$REPO:$TAG"
+    podman manifest push --all --rm "$REPO:$TAG"
 
 # Inspect the container
 dive:
