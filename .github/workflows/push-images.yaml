@@ -44,6 +44,7 @@ jobs:
           TAG=$(date +'%Y-%m-%d_%H-%M')
           podman manifest add --help
           podman images
+          podman inspect localhost/lsyncd:latest-aarch64
           podman manifest create "$REPO:$TAG"
           podman manifest add "$REPO:$TAG" localhost/lsyncd:latest-aarch64
           podman manifest add "$REPO:$TAG" localhost/lsyncd:latest-x86_64
