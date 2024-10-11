@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 jobs:
-  build-images:
+  build-and-push-images:
     if: ${{ github.event.pull_request.merged }}
     runs-on: ubuntu-latest
     steps:
@@ -32,21 +32,13 @@ jobs:
         run: nix build -o container_aarch64 '#.packages.aarch64-linux.container_aarch64'
       - name: Build x86_64 image
         run: nix build -o container_x86_64 '#.packages.x86_64-linux.container_x86_64'
-      # - name: Load images into podman
-      #   run: |
-      #     podman load < container_aarch64
-      #     podman load < container_x86_64
       - name: Login to ECR
         run: nix develop --command bash -c "aws ecr get-login-password --region ${{ secrets.REPO_ECR_REGION }}" | podman login --username AWS --password-stdin ${{ secrets.ACCOUNT_ECR_REPO }}
       - name: Create and push manifest
         run: |
           REPO="${{ secrets.ACCOUNT_ECR_REPO }}/lsyncd"
           TAG=$(date +'%Y-%m-%d_%H-%M')
-          echo "Creating manifest"
           podman manifest create "$REPO:$TAG"
-          echo "Adding aarch64 image to manifest"
           podman manifest add "$REPO:$TAG" docker-archive:container_aarch64
-          echo "Adding x86_64 image to manifest"
           podman manifest add "$REPO:$TAG" docker-archive:container_x86_64
-          echo "Pushing manifest"
           podman manifest push --all --rm "$REPO:$TAG" "docker://$REPO:$TAG"
