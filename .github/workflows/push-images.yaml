@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 jobs:
-  build-images:
+  build-and-push-images:
     if: ${{ github.event.pull_request.merged }}
     runs-on: ubuntu-latest
     steps:
