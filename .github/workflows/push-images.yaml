@@ -49,4 +49,4 @@ jobs:
           echo "Adding x86_64 image to manifest"
           podman manifest add "$REPO:$TAG" docker-archive:container_x86_64
           echo "Pushing manifest"
-          podman manifest push --all --rm "$REPO:$TAG"
+          podman manifest push --all --rm "$REPO:$TAG" "docker://$REPO:$TAG"
