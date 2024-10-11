@@ -21,6 +21,7 @@
           paths = with pkgs; [
             dockerTools.caCertificates
             lsyncd
+            rsync
           ];
           pathsToLink = ["/bin" "/etc" "/var"];
         };
@@ -35,6 +36,7 @@
           paths = with pkgs.pkgsCross.aarch64-multiplatform; [
             dockerTools.caCertificates
             lsyncd
+            rsync
           ];
           pathsToLink = ["/bin" "/etc" "/var"];
         };
