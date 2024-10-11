@@ -43,6 +43,6 @@ jobs:
           REPO="${{ secrets.ACCOUNT_ECR_REPO }}/lsyncd"
           TAG=$(date +'%Y-%m-%d_%H-%M')
           podman manifest create "$REPO:$TAG"
-          podman manifest add "$REPO:$TAG" oci-archive:container_aarch64
-          podman manifest add "$REPO:$TAG" oci-archive:container_x86_64
+          podman manifest add "$REPO:$TAG" docker-archive:container_aarch64
+          podman manifest add "$REPO:$TAG" docker-archive:container_x86_64
           podman manifest push --all --rm "$REPO:$TAG"
