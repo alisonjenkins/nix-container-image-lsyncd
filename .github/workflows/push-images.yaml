@@ -34,15 +34,15 @@ jobs:
         run: nix build -o container_aarch64 '#.packages.x86_64-linux.container_x86_64'
       - name: Load images into podman
         run: |
-          nix develop --command bash -c "podman system renumber && podman load < container_aarch64"
-          nix develop --command bash -c "podman system renumber && podman load < container_x86_64"
+          podman load < container_aarch64
+          podman load < container_x86_64
       - name: Login to ECR
-        run: nix develop --command bash -c "aws ecr get-login-password --region ${{ secrets.REPO_ECR_REGION }} | podman login --username AWS --password-stdin ${{ secrets.ACCOUNT_ECR_REPO }}"
+        run: nix develop --command bash -c "aws ecr get-login-password --region ${{ secrets.REPO_ECR_REGION }}" | podman login --username AWS --password-stdin ${{ secrets.ACCOUNT_ECR_REPO }}
       - name: Create and push manifest
         run: |
           REPO="${{ secrets.ACCOUNT_ECR_REPO }}/lsyncd"
           TAG=$(date +'%Y-%m-%d_%H-%M')
-          nix develop --command bash -c "podman manifest create --amend \"$REPO:$TAG\""
-          nix develop --command bash -c "podman manifest add \"$REPO:$TAG\" \"localhost/lsyncd:latest-aarch64\""
-          nix develop --command bash -c "podman manifest add \"$REPO:$TAG\" \"localhost/lsyncd:latest-x86_64\""
-          nix develop --command bash -c "podman manifest push --all --rm \"$REPO:$TAG\""
+          podman manifest create --amend "$REPO:$TAG"
+          podman manifest add "$REPO:$TAG" "localhost/lsyncd:latest-aarch64"
+          podman manifest add "$REPO:$TAG" "localhost/lsyncd:latest-x86_64"
+          podman manifest push --all --rm "$REPO:$TAG"
