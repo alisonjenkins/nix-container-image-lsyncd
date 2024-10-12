@@ -12,6 +12,19 @@
         inherit system;
       };
 
+      pkgs_arm64 = import inputs.nixpkgs {
+        system = "aarch64-linux";
+      };
+
+      lsyncd_prestop_script = {pkgs}:
+        pkgs.writeShellScriptBin "lsyncd_prestop_script" ''
+          while ${pkgs.procps}/bin/kill -0 $(${pkgs.coreutils}/bin/cat /tmp/minecraft.pid); do
+            ${pkgs.coreutils}/bin/sleep 0.2
+          done
+
+          ${pkgs.rsync}/bin/rsync /mnt/minecraft/world/ /mnt/state/world/
+        '';
+
       container_x86_64 = pkgs.dockerTools.buildLayeredImage {
         name = "lsyncd";
         tag = "latest-x86_64";
@@ -21,6 +34,7 @@
           paths = with pkgs; [
             dockerTools.caCertificates
             lsyncd
+            (lsyncd_prestop_script {inherit pkgs;})
             rsync
           ];
           pathsToLink = ["/bin" "/etc" "/var"];
@@ -36,6 +50,7 @@
           paths = with pkgs.pkgsCross.aarch64-multiplatform; [
             dockerTools.caCertificates
             lsyncd
+            (lsyncd_prestop_script {pkgs = pkgs_arm64;})
             rsync
           ];
           pathsToLink = ["/bin" "/etc" "/var"];
