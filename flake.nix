@@ -18,10 +18,12 @@
 
       lsyncd_prestop_script = {pkgs}:
         pkgs.writeShellScriptBin "lsyncd_prestop_script" ''
-          while ${pkgs.procps}/bin/kill -0 $(${pkgs.coreutils}/bin/cat /tmp/minecraft.pid); do
+          while ${pkgs.procps}/bin/kill -0 $(${pkgs.coreutils}/bin/cat /tmp/minecraft.pid) &>/dev/null; do
+            echo "Minecraft is still running, sleeping for 0.2s"
             ${pkgs.coreutils}/bin/sleep 0.2
           done
 
+          echo "Syncing world to world state"
           ${pkgs.rsync}/bin/rsync /mnt/minecraft/world/ /mnt/state/world/
         '';
 
