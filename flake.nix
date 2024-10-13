@@ -16,15 +16,20 @@
         system = "aarch64-linux";
       };
 
-      lsyncd_prestop_script = {pkgs}:
-        pkgs.writeShellScriptBin "lsyncd_prestop_script" ''
-          while ${pkgs.procps}/bin/kill -0 $(${pkgs.coreutils}/bin/cat /tmp/minecraft.pid) &>/dev/null; do
-            echo "Minecraft is still running, sleeping for 0.2s"
-            ${pkgs.coreutils}/bin/sleep 0.2
-          done
+      lsync_world_script = {pkgs}:
+        pkgs.writeShellScriptBin "lsync_world" ''
+          function sigterm_handler() {
+            while ${pkgs.procps}/bin/kill -0 $(${pkgs.coreutils}/bin/cat /tmp/minecraft.pid) &>/dev/null; do
+              echo "Minecraft is still running, sleeping for 0.2s"
+              ${pkgs.coreutils}/bin/sleep 0.2
+            done
 
-          echo "Syncing world to world state"
-          ${pkgs.rsync}/bin/rsync /mnt/minecraft/world/ /mnt/state/world/
+            echo "Syncing world to world state"
+            ${pkgs.rsync}/bin/rsync /mnt/minecraft/world/ /mnt/state/world/
+          }
+          trap sigterm_handler SIGTERM
+
+          ${pkgs.lsyncd}/bin/lsyncd -nodaemon -log all -rsync $1 $2
         '';
 
       container_x86_64 = pkgs.dockerTools.buildLayeredImage {
