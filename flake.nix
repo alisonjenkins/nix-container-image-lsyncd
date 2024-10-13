@@ -41,7 +41,7 @@
           paths = with pkgs; [
             dockerTools.caCertificates
             lsyncd
-            (lsyncd_prestop_script {inherit pkgs;})
+            (lsync_world_script {inherit pkgs;})
             rsync
           ];
           pathsToLink = ["/bin" "/etc" "/var"];
@@ -57,7 +57,7 @@
           paths = with pkgs.pkgsCross.aarch64-multiplatform; [
             dockerTools.caCertificates
             lsyncd
-            (lsyncd_prestop_script {pkgs = pkgs_arm64;})
+            (lsync_world_script {pkgs = pkgs_arm64;})
             rsync
           ];
           pathsToLink = ["/bin" "/etc" "/var"];
