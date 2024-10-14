@@ -18,26 +18,40 @@
 
       lsync_world_script = {pkgs}:
         pkgs.writeShellScriptBin "lsync_world" ''
+          LSYNCD_PIDFILE=/tmp/lsyncd.pid
+          MINECRAFT_PIDFILE=/tmp/minecraft.pid
+
           function sigterm_handler() {
             echo "Received Sigterm, checking if Minecraft is still running..."
-            while ${pkgs.procps}/bin/kill -0 $(${pkgs.coreutils}/bin/cat /tmp/minecraft.pid) &>/dev/null; do
+            while ${pkgs.procps}/bin/pkill -0 $MINECRAFT_PIDFILE &>/dev/null; do
               echo "Minecraft is still running, sleeping for 0.2s"
               ${pkgs.coreutils}/bin/sleep 0.2
             done
             echo "Minecraft now stopped..."
 
+            echo "lsyncd pidfile..."
+            if test -f $LSYNCD_PIDFILE; then
+              echo -e "\tExists"
+              echo "With content"
+              ${pkgs.coreutils}/bin/cat $LSYNCD_PIDFILE
+            else
+              echo -e "\tDoes not exist"
+            fi
+
             echo "Killing lsyncd"
-            ${pkgs.procps}/bin/kill $(${pkgs.coreutils}/bin/cat /tmp/lsyncd.pid)
+            ${pkgs.procps}/bin/pkill -F $LSYNCD_PIDFILE
 
-            echo "Syncing world to world state using rsync"
-            ${pkgs.rsync}/bin/rsync $1 $2
+            echo "Syncing world: ( $1/ ) to world state: ( $2/ ) using rsync"
+            ${pkgs.rsync}/bin/rsync $1/ $2/
           }
-          trap sigterm_handler SIGTERM
+          trap "sigterm_handler $1 $2" SIGTERM
 
-          ${pkgs.lsyncd}/bin/lsyncd -nodaemon -log all --pidfile /tmp/lsyncd.pid -rsync $1 $2 &
+          ${pkgs.coreutils}/bin/ls -lad /tmp
 
-          while true; do
-            ${pkgs.coreutils}/bin/sleep 60
+          ${pkgs.lsyncd}/bin/lsyncd -log all -pidfile $LSYNCD_PIDFILE -rsync $1 $2 &
+
+          while ${pkgs.procps}/bin/pkill -0 -F $LSYNCD_PIDFILE &>/dev/null; do
+            ${pkgs.coreutils}/bin/sleep 5
           done
         '';
 
