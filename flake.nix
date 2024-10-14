@@ -34,6 +34,7 @@
 
           ${pkgs.lsyncd}/bin/lsyncd -nodaemon -log all -rsync $1 $2 &
           echo "$!" > /tmp/lsyncd.pid
+          fg
         '';
 
       container_x86_64 = pkgs.dockerTools.buildLayeredImage {
