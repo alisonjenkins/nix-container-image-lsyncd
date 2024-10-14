@@ -32,9 +32,7 @@
           }
           trap sigterm_handler SIGTERM
 
-          ${pkgs.lsyncd}/bin/lsyncd -nodaemon -log all -rsync $1 $2 &
-          echo "$!" > /tmp/lsyncd.pid
-          fg
+          ${pkgs.lsyncd}/bin/lsyncd -nodaemon -log all --pidfile /tmp/lsyncd.pid -rsync $1 $2
         '';
 
       container_x86_64 = pkgs.dockerTools.buildLayeredImage {
@@ -83,9 +81,10 @@
       };
 
       devShells.default = pkgs.mkShell {
-        packages = [
-          pkgs.just
-          pkgs.podman
+        packages = with pkgs; [
+          just
+          lsyncd
+          podman
         ];
       };
     });
