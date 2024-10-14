@@ -19,16 +19,18 @@
       lsync_world_script = {pkgs}:
         pkgs.writeShellScriptBin "lsync_world" ''
           function sigterm_handler() {
+            echo "Received Sigterm, checking if Minecraft is still running..."
             while ${pkgs.procps}/bin/kill -0 $(${pkgs.coreutils}/bin/cat /tmp/minecraft.pid) &>/dev/null; do
               echo "Minecraft is still running, sleeping for 0.2s"
               ${pkgs.coreutils}/bin/sleep 0.2
             done
+            echo "Minecraft now stopped..."
 
             echo "Killing lsyncd"
             ${pkgs.procps}/bin/kill $(${pkgs.coreutils}/bin/cat /tmp/lsyncd.pid)
 
-            echo "Syncing world to world state"
-            ${pkgs.rsync}/bin/rsync /mnt/minecraft/world/ /mnt/state/world/
+            echo "Syncing world to world state using rsync"
+            ${pkgs.rsync}/bin/rsync $1 $2
           }
           trap sigterm_handler SIGTERM
 
