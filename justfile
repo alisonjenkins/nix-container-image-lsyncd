@@ -24,6 +24,7 @@ dive:
 # Run the container
 run:
     podman run -it --rm localhost/lsyncd:latest-x86_64
+    mkdir -p state tmp world
 
 alias b := build
 alias d := dive
