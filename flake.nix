@@ -87,6 +87,7 @@
           just
           lsyncd
           podman
+          procps
         ];
       };
     });
