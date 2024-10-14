@@ -25,8 +25,8 @@ dive:
 
 # Run the container
 run:
-    podman run -it --rm localhost/lsyncd:latest-x86_64
     mkdir -p state tmp world
+    podman run -it --rm -v "$(pwd)/world:/media/storage/world" -v "$(pwd)/state:/mnt/state/world" -v "$(pwd)/tmp:/tmp" localhost/lsyncd:latest-x86_64 /bin/lsync_world /media/storage/world /mnt/state/world
 
 alias b := build
 alias d := dive
