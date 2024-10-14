@@ -50,6 +50,10 @@
           ];
           pathsToLink = ["/bin" "/etc" "/var"];
         };
+        fakeRootCommands = ''
+          mkdir /tmp
+          chmod 1777 /tmp
+        '';
       };
 
       container_aarch64 = pkgs.pkgsCross.aarch64-multiplatform.dockerTools.buildLayeredImage {
@@ -66,6 +70,10 @@
           ];
           pathsToLink = ["/bin" "/etc" "/var"];
         };
+        fakeRootCommands = ''
+          mkdir /tmp
+          chmod 1777 /tmp
+        '';
       };
     in {
       packages = {
