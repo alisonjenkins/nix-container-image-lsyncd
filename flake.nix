@@ -37,7 +37,7 @@
           ${pkgs.lsyncd}/bin/lsyncd -nodaemon -log all --pidfile /tmp/lsyncd.pid -rsync $1 $2 &
 
           while true; do
-            sleep 60
+            ${pkgs.coreutils}/bin/sleep 60
           done
         '';
 
