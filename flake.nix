@@ -34,7 +34,11 @@
           }
           trap sigterm_handler SIGTERM
 
-          ${pkgs.lsyncd}/bin/lsyncd -nodaemon -log all --pidfile /tmp/lsyncd.pid -rsync $1 $2
+          ${pkgs.lsyncd}/bin/lsyncd -nodaemon -log all --pidfile /tmp/lsyncd.pid -rsync $1 $2 &
+
+          while true; do
+            sleep 60
+          done
         '';
 
       container_x86_64 = pkgs.dockerTools.buildLayeredImage {
