@@ -24,12 +24,16 @@
               ${pkgs.coreutils}/bin/sleep 0.2
             done
 
+            echo "Killing lsyncd"
+            ${pkgs.procps}/bin/kill $(${pkgs.coreutils}/bin/cat /tmp/lsyncd.pid)
+
             echo "Syncing world to world state"
             ${pkgs.rsync}/bin/rsync /mnt/minecraft/world/ /mnt/state/world/
           }
           trap sigterm_handler SIGTERM
 
-          ${pkgs.lsyncd}/bin/lsyncd -nodaemon -log all -rsync $1 $2
+          ${pkgs.lsyncd}/bin/lsyncd -nodaemon -log all -rsync $1 $2 &
+          echo "$!" > /tmp/lsyncd.pid
         '';
 
       container_x86_64 = pkgs.dockerTools.buildLayeredImage {
